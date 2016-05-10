@@ -1,0 +1,129 @@
+package multiformats
+
+// the multiformats are self-describing formats for systems like IPFS.
+// There are several formats:
+// - multihash
+// - multiaddr
+// - multicodec
+// - multistream
+// - multikey
+
+
+// Multihash is a self-describing hash format.
+// See https://github.com/jbenet/multihash
+type Multihash interface {
+
+// Code is the code of the hashing function used
+Code() string
+
+// Length is the length of the hash digest
+Length() int
+
+// RawDigest is the raw hash function digest, without the multihash prefix
+RawDigest() []byte
+
+// Value is the raw bytes representing a multihash
+Value() []byte
+}
+
+/*
+Multiaddr is a self-describing cross-protocol, cross-platform format for representing
+internet addresses. It emphasizes explicitness and self-description.
+Learn more here: https://github.com/jbenet/multiaddr
+Multiaddrs have both a binary and string representation.
+    import ma "github.com/jbenet/go-multiaddr"
+    addr, err := ma.NewMultiaddr("/ip4/1.2.3.4/tcp/80")
+    // err non-nil when parsing failed.
+*/
+type Multiaddr interface {
+        // Equal returns whether two Multiaddrs are exactly equal
+        Equal(Multiaddr) bool
+
+        // Bytes returns the []byte representation of this Multiaddr
+        Bytes() []byte
+
+        // String returns the string representation of this Multiaddr
+        String() string
+
+        // Protocols returns the list of Protocols this Multiaddr includes
+        Protocols() []int
+
+        // ValueForProtocol returns the value (if any) following the specified protocol
+        ValueForProtocol(code int) (string, error)
+}
+
+// Codec is an algorithm for coding data from one representation
+// to another. For convenience, we define a codec in the usual
+// sense: a function and its inverse, to encode and decode.
+type Codec interface {
+        // Decoder wraps given io.Reader and returns an object which
+        // will decode bytes into objects.
+        Decoder(r io.Reader) Decoder
+
+        // Encoder wraps given io.Writer and returns an Encoder
+        Encoder(w io.Writer) Encoder
+}
+
+// Encoder encodes objects into bytes and writes them to an
+// underlying io.Writer. Works like encoding.Marshal
+type Encoder interface {
+        Encode(n interface{}) error
+}
+
+// Decoder decodes objects from bytes from an underlying
+// io.Reader, into given object. Works like encoding.Unmarshal
+type Decoder interface {
+        Decode(n interface{}) error
+}
+
+// the type of a Multicodec header.
+type Multicodec.Header interface {
+    Bytes() []byte
+    String() string
+}
+
+// Multicodec is a self-describing data codec (encoder/decoder) format.
+// It works with data serialization and bytestreams.
+// See https://github.com/jbenet/multicodec
+type Multicodec interface {
+        Codec
+
+        Header() Multicodec.Header
+}
+
+// Multicodec.Buffer is a Multicodec-encoded buffer of bytes
+type Multicodec.Buffer interface {
+// Header returns the Multicodec header
+Header() Multicodec.Header
+
+// Raw returns the underlying bytes, including the header
+Raw() []byte
+
+// Bytes returns the encoded bytes, without the header
+Bytes() []byte
+}
+
+// Multicodec.Reader is a Multicodec-encoded stream of bytes
+type Multicodec.Reader interface {
+// Header returns the Multicodec header
+Header() Multicodec.Header
+
+// Raw returns the underlying stream, including the header
+Raw() io.Reader
+
+// Reader returns the encoded sytream, without the header
+Reader() io.Reader
+}
+
+
+// Multistream - self-describing protocol streams.
+// multistream is a format -- or simple protocol -- for disambiguating, and layering streams. It is extremely simple.
+// See https://github.com/jbenet/multistream
+type Multistream interface {
+// TODO
+}
+
+
+// Multikey is a self-describing key format.
+// See
+type Multikey []byte
